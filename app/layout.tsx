@@ -5,6 +5,10 @@ import Navigation from "@/components/Navbar";
 import LoginModal from "@/components/modals/LoginModal";
 import SignupModal from "@/components/modals/SignupModal";
 import LogoutConfirmModal from "@/components/modals/LogoutConfirmModal";
+import { useAuthStore } from "@/store/authStore";
+
+// const {authUser} = useAuthStore();
+// console.log(authUser);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

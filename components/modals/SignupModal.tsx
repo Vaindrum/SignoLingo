@@ -62,7 +62,7 @@ export default function SignupModal() {
             type="text"
             placeholder="Name"
             value={name}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 mb-3 rounded-lg border border-gray-700 bg-[--background] text-[--foreground] focus:outline-none focus:ring-2 focus:ring-primary"
           />
 

@@ -32,9 +32,9 @@ export default function Navigation() {
         ) : (
           <button
             onClick={() => openModal("login")}
-            className="text-blue-500 font-semibold hover:underline flex items-center gap-1"
+            className="hover:text-blue-500"
           >
-            <FaUser /> Login
+            Login
           </button>
         )}
         </div>
