@@ -7,7 +7,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useModalStore } from "@/store/modalStore";
 
 export default function Navigation() {
-    const { user } = useAuthStore();
+    const { authUser } = useAuthStore();
     const { openModal } = useModalStore();
 
     return (
@@ -19,9 +19,9 @@ export default function Navigation() {
           <Link href="/" className="hover:text-blue-500">Home</Link>
           <Link href="/learn" className="hover:text-blue-500">Learn</Link>
           <Link href="/progress" className="hover:text-blue-500">Progress</Link>
-          {user ? (
+          {authUser ? (
           <div className="flex gap-4 items-center">
-            <span>Hello, {user.name}</span>
+            <span>Hello, {authUser.username}</span>
             <button
               onClick={() => openModal("logoutConfirm")}
               className="text-red-500 font-semibold hover:underline"
@@ -55,9 +55,9 @@ export default function Navigation() {
             <FaTrophy className="w-6 h-6" />
             <span>Progress</span>
           </Link>
-          {user ? (
+          {authUser ? (
           <div className="flex gap-4 items-center">
-            <span>Hello, {user.name}</span>
+            <span>Hello, {authUser.username}</span>
             <button
               onClick={() => openModal("logoutConfirm")}
               className="text-red-500 font-semibold hover:underline"

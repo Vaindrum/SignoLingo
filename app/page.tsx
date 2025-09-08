@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { FaHeart } from "react-icons/fa";
 
 export default function HomePage() {
   return (
@@ -52,9 +53,9 @@ export default function HomePage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.8 }}
-        className="absolute bottom-4 text-xs sm:text-sm text-muted px-2 text-center"
+        className="absolute bottom-4 text-xs sm:text-sm text-muted px-2 text-center flex gap-2"
       >
-        Made with ❤️ by Team SignoLingo
+        Made with <FaHeart className="mt-1"/> by Team SignoLingo
       </motion.footer>
     </div>
   );
