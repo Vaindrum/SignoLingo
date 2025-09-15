@@ -16,6 +16,8 @@ export default function IdGrid() {
     items = "abcdefghijklmnopqrstuvwxyz".split("");
   } else if (id === "numbers") {
     items = "0123456789".split("");
+  } else if (id === "greetings") {
+    items = ["hello", "thankyou", "please", "goodbye", "sorry", "yes", "no"];
   }
 
   return (
@@ -27,7 +29,7 @@ export default function IdGrid() {
       <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
         {items.map((item) => (
           <Link key={item} href={`/lessons/${id}/${item}`}>
-            <div className="flex items-center justify-center h-16 w-16 bg-background shadow-md rounded-lg cursor-pointer hover:bg-primary hover:text-background transition-colors duration-200 text-xl font-semibold text-foreground border border-muted">
+            <div className="flex items-center justify-center h-26 w-30 bg-background shadow-md rounded-lg cursor-pointer hover:bg-primary hover:text-background transition-colors duration-200 text-xl font-semibold text-foreground border border-muted">
               {item.toUpperCase()}
             </div>
           </Link>

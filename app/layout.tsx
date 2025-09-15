@@ -1,14 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navigation from "@/components/Navbar";
-import LoginModal from "@/components/modals/LoginModal";
-import SignupModal from "@/components/modals/SignupModal";
-import LogoutConfirmModal from "@/components/modals/LogoutConfirmModal";
-import { useAuthStore } from "@/store/authStore";
-
-// const {authUser} = useAuthStore();
-// console.log(authUser);
+import ClientLayout from "../components/ClientLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,19 +20,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Navigation/>
-        {children}
-        <LoginModal />
-        <SignupModal />
-        <LogoutConfirmModal />
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

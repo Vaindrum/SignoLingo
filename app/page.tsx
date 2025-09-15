@@ -40,12 +40,12 @@ export default function HomePage() {
         >
           Start Learning
         </Link>
-        <Link
+        {/* <Link
           href="/leaderboard"
           className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-background border-2 border-primary text-primary font-semibold hover:bg-muted shadow-lg transition text-center"
         >
           View Leaderboard
-        </Link>
+        </Link> */}
       </motion.div>
 
       {/* Footer */}

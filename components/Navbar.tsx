@@ -21,7 +21,7 @@ export default function Navigation() {
           <Link href="/progress" className="hover:text-blue-500">Progress</Link>
           {authUser ? (
           <div className="flex gap-4 items-center">
-            <span>Hello, {authUser.username}</span>
+            {/* <span>Hello, {authUser.username}</span> */}
             <button
               onClick={() => openModal("logoutConfirm")}
               className="text-red-500 font-semibold hover:underline"
@@ -57,7 +57,7 @@ export default function Navigation() {
           </Link>
           {authUser ? (
           <div className="flex gap-4 items-center">
-            <span>Hello, {authUser.username}</span>
+            {/* <span>Hello, {authUser.username}</span> */}
             <button
               onClick={() => openModal("logoutConfirm")}
               className="text-red-500 font-semibold hover:underline"

@@ -41,7 +41,7 @@ export default function LogoutConfirmModal() {
             </button>
             <button
               onClick={closeModal}
-              className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600"
             >
               Cancel
             </button>
