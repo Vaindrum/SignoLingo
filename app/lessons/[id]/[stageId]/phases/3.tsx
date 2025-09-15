@@ -53,7 +53,7 @@ export default function Phase3({ letter }: Phase3Props) {
         ref={videoRef}
         autoPlay
         playsInline
-        className="w-64 h-48 bg-muted rounded mb-4"
+        className="w-107 h-80 bg-muted rounded mb-4"
       />
       <button
         onClick={handleFinish}

@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { FaHome, FaBookOpen, FaTrophy, FaUser } from "react-icons/fa";
+import { FaHome, FaBookOpen, FaTrophy, FaUser, FaDoorOpen } from "react-icons/fa";
 import { useAuthStore } from "@/store/authStore";
 import { useModalStore } from "@/store/modalStore";
 
@@ -14,9 +14,9 @@ export default function Navigation() {
     <>
       {/* Desktop Navbar */}
       <nav className="hidden md:flex justify-between items-center px-8 py-4 shadow-sm bg-background sticky top-0 z-50">
-        <div className="text-xl font-bold">SignoLingo</div>
+        <div onClick={() => window.location.href = "/"} className="text-xl font-bold cursor-pointer">SignoLingo</div>
         <div className="flex gap-6">
-          <Link href="/" className="hover:text-blue-500">Home</Link>
+          {/* <Link href="/" className="hover:text-blue-500">Home</Link> */}
           <Link href="/learn" className="hover:text-blue-500">Learn</Link>
           <Link href="/progress" className="hover:text-blue-500">Progress</Link>
           {authUser ? (
@@ -32,7 +32,7 @@ export default function Navigation() {
         ) : (
           <button
             onClick={() => openModal("login")}
-            className="hover:text-blue-500"
+            className="hover:text-blue-500 cursor-pointer"
           >
             Login
           </button>
@@ -60,9 +60,9 @@ export default function Navigation() {
             {/* <span>Hello, {authUser.username}</span> */}
             <button
               onClick={() => openModal("logoutConfirm")}
-              className="text-red-500 font-semibold hover:underline"
+              className="flex flex-col items-center text-red-500 font-semibold hover:underline"
             >
-              Logout
+              <FaDoorOpen className="w-6 h-6" /> Logout
             </button>
           </div>
         ) : (

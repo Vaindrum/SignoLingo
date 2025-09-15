@@ -56,19 +56,19 @@ export default function Phase2({ letter, onComplete }: Phase2Props) {
     <div className="flex flex-col items-center">
       <h2 className="text-2xl font-bold mb-4">Type the letter you see:</h2>
       {alphabet.demoImage && (
-        <img src={alphabet.demoImage} alt={alphabet.letter} className="w-40 h-40 mb-4" />
+        <img src={alphabet.demoImage} alt={alphabet.letter} className="w-80 h-80 mb-4" />
       )}
       <input
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         maxLength={1}
-        className="border border-[var(--muted)] px-4 py-2 rounded mb-2 text-center text-xl w-20"
+        className="border border-[var(--muted)] px-4 py-2 rounded mb-2 text-center text-xl w-40"
       />
       {error && <p className="text-red-500 mb-2">{error}</p>}
       <button
         onClick={handleSubmit}
-        className="px-4 py-2 bg-[var(--primary)] text-[var(--background)] rounded hover:scale-105 transition"
+        className="px-4 mt-2 py-2 bg-[var(--primary)] text-[var(--background)] rounded hover:scale-105 transition"
       >
         Next
       </button>

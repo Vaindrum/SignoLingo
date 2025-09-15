@@ -43,14 +43,14 @@ useEffect(() => {
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-bold mb-4">{alphabet.letter}</h2>
+      <h2 className="text-4xl font-bold mb-4">{alphabet.letter}</h2>
       {alphabet.demoImage && (
-        <img src={alphabet.demoImage} alt={alphabet.letter} className="w-40 h-40 mb-4" />
+        <img src={alphabet.demoImage} alt={alphabet.letter} className="w-80 h-80 mb-4" />
       )}
       {alphabet.description && <p className="mb-4">{alphabet.description}</p>}
 
       <button
-        className="px-4 py-2 bg-[var(--primary)] text-[var(--background)] rounded hover:scale-105 transition"
+        className="px-4 py-2 mt-2 bg-[var(--primary)] text-[var(--background)] rounded hover:scale-105 transition"
         onClick={onComplete}
       >
         Next
