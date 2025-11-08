@@ -1,56 +1,47 @@
 "use client";
-import { useEffect, useState } from "react";
-import { axiosInstance } from "@/lib/axios";
-
-interface AlphabetData {
-  letter: string;
-  demoImage: string; // or whatever fields your backend returns
-  description?: string;
-}
 
 interface Phase1Props {
   letter: string;
+  imageUrl?: string;
+  isVideo?: boolean;
+  lessonType?: string;
   onComplete: () => void;
 }
 
-export default function Phase1({ letter, onComplete }: Phase1Props) {
-  const [alphabet, setAlphabet] = useState<AlphabetData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-useEffect(() => {
-  const fetchAlphabet = async () => {
-    try {
-      const { data } = await axiosInstance.get(`/alphabet/${letter}`);
-      if (data.success) {
-        setAlphabet(data.data);
-      } else {
-        setError(data.message || "Alphabet not found");
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Failed to fetch");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchAlphabet();
-}, [letter]);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
-  if (!alphabet) return null;
-
+export default function Phase1({ letter, imageUrl, isVideo, lessonType, onComplete }: Phase1Props) {
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-4xl font-bold mb-4">{alphabet.letter}</h2>
-      {alphabet.demoImage && (
-        <img src={alphabet.demoImage} alt={alphabet.letter} className="w-80 h-80 mb-4" />
+      <h2 className="text-4xl font-bold mb-4">{letter.toUpperCase()}</h2>
+      
+      {imageUrl && (
+        <div className="w-80 h-80 mb-4 flex items-center justify-center bg-muted rounded-lg overflow-hidden">
+          {isVideo ? (
+            <video 
+              src={imageUrl} 
+              className="w-full h-full object-contain"
+              controls
+              autoPlay
+              loop
+              muted
+            />
+          ) : (
+            <img 
+              src={imageUrl} 
+              alt={letter} 
+              className="w-full h-full object-contain" 
+            />
+          )}
+        </div>
       )}
-      {alphabet.description && <p className="mb-4">{alphabet.description}</p>}
+
+      <p className="text-lg mb-4 text-muted-foreground">
+        {lessonType === "alphabet" && "Learn how to sign this letter"}
+        {lessonType === "numbers" && "Learn how to sign this number"}
+        {lessonType === "words" && "Learn how to sign this word"}
+      </p>
 
       <button
-        className="px-4 py-2 mt-2 bg-[var(--primary)] text-[var(--background)] rounded hover:scale-105 transition"
+        className="px-6 py-3 mt-2 bg-primary text-background rounded-lg hover:bg-primary/90 transition-all"
         onClick={onComplete}
       >
         Next

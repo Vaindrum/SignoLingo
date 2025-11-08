@@ -28,8 +28,8 @@ export const lessons = [
     ],
   },
   {
-    id: "greetings",
-    title: "Greetings",
+    id: "words",
+    title: "Words",
     description: "Learn how to say hello, thank you, and more.",
     xp: 20,
     questions: [
