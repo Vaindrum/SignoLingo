@@ -42,7 +42,8 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
-    router.push("/good-job");
+    // Route to good-job page with lesson type
+    router.push(`/good-job?type=${lessonType || "alphabet"}`);
   };
 
   return (

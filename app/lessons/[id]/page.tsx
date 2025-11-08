@@ -3,12 +3,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
+const DIFFICULTY_LEVELS = ["Very easy", "Easy", "Moderate", "Hard", "Very hard"];
+
 export default function IdGrid() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
   const [items, setItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("Very easy");
 
   useEffect(() => {
     async function fetchItems() {
@@ -23,9 +26,9 @@ export default function IdGrid() {
         } else if (id === "numbers") {
           setItems("0123456789".split(""));
         } else if (id === "words") {
-          // Fetch words from backend
+          // Fetch words from backend by difficulty level
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/"}word/all?limit=50&sort=rank`
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/"}word/difficulty/${selectedDifficulty}?limit=100&sort=rank`
           );
           if (response.ok) {
             const data = await response.json();
@@ -44,7 +47,7 @@ export default function IdGrid() {
     }
 
     fetchItems();
-  }, [id]);
+  }, [id, selectedDifficulty]);
 
   if (!id) {
     return <p className="text-center mt-10 text-red-500">Category not found</p>;
@@ -64,9 +67,28 @@ export default function IdGrid() {
         {id.charAt(0).toUpperCase() + id.slice(1)} Lessons
       </h1>
 
+      {/* Difficulty Level Filter - Only show for words */}
+      {id === "words" && (
+        <div className="mb-6 flex flex-wrap gap-2 justify-center">
+          {DIFFICULTY_LEVELS.map((level) => (
+            <button
+              key={level}
+              onClick={() => setSelectedDifficulty(level)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                selectedDifficulty === level
+                  ? "bg-primary text-background shadow-lg scale-105"
+                  : "bg-muted text-foreground hover:bg-muted/80"
+              }`}
+            >
+              {level}
+            </button>
+          ))}
+        </div>
+      )}
+
       {items.length === 0 ? (
         <p className="text-center text-muted-foreground mt-10">
-          No {id} available at the moment.
+          No {id} available{id === "words" ? ` for ${selectedDifficulty} difficulty` : ""} at the moment.
         </p>
       ) : (
         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
@@ -79,6 +101,13 @@ export default function IdGrid() {
           ))}
         </div>
       )}
+
+      {/* Go Back Button */}
+      <Link href="/lessons" className="mt-8">
+        <button className="px-6 py-3 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-all">
+          Go Back
+        </button>
+      </Link>
     </div>
   );
 }

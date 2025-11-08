@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import Phase1 from "./phases/1";
 import Phase2 from "./phases/2";
 import Phase3 from "./phases/3";
@@ -125,6 +126,7 @@ export default function StagePage() {
   return (
     <div className="p-6 flex flex-col items-center min-h-screen bg-background">
       <div className="w-full max-w-4xl">
+
         <h2 className="text-2xl font-bold text-center mb-6 text-foreground">
           {/* {id === "alphabet" && "Letter"}  */}
           {/* {id === "numbers" && "Number"}  */}
@@ -158,6 +160,14 @@ export default function StagePage() {
           />
         )}
       </div>
+        {/* Cancel Button */}
+        <div className="mb-4 mt-3">
+          <Link href={`/lessons/${id}`}>
+            <button className="px-4 py-2 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-all">
+              Cancel
+            </button>
+          </Link>
+        </div>
     </div>
   );
 }
