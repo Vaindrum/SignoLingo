@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-const DIFFICULTY_LEVELS = ["Very easy", "Easy", "Moderate", "Hard", "Very hard"];
+const DIFFICULTY_LEVELS = ["Very easy", "Easy", "Moderate", "Hard", "Very hard","Tested"];
 
 export default function IdGrid() {
   const params = useParams();
@@ -27,9 +27,14 @@ export default function IdGrid() {
           setItems("0123456789".split(""));
         } else if (id === "words") {
           // Fetch words from backend by difficulty level
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/"}word/difficulty/${selectedDifficulty}?limit=100&sort=rank`
-          );
+          const endpoint = selectedDifficulty === "Tested" 
+            ? `${process.env.NEXT_PUBLIC_API_URL}word/test?page=1&limit=100&sort=rank`
+            : `${process.env.NEXT_PUBLIC_API_URL}word/difficulty/${selectedDifficulty}?limit=1000&sort=rank`;
+          
+          const response = await fetch(endpoint);
+          // const response = await fetch(
+          //   `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/"}word/difficulty/${selectedDifficulty}?limit=100&sort=rank`
+          // );
           if (response.ok) {
             const data = await response.json();
             setItems(data.data.map((item: any) => item.word));
