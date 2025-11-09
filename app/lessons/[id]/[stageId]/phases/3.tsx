@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { io, Socket } from "socket.io-client";
 
 interface Phase3Props {
   letter: string;
@@ -15,6 +16,16 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
   const streamRef = useRef<MediaStream | null>(null);
   const [cameraError, setCameraError] = useState("");
   const [showReference, setShowReference] = useState(false);
+
+  // Socket.IO states
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [prediction, setPrediction] = useState({ label: 'none', score: 0 });
+  const [isCorrect, setIsCorrect] = useState(false);
+
+  // Refs for frame capture and interval
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     async function enableCamera() {
@@ -38,10 +49,128 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
     };
   }, []);
 
+  // Socket.IO initialization - connect immediately on mount
+  useEffect(() => {
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKETIO_URL;
+    if (!socketUrl) {
+      console.error("Socket.IO URL not configured");
+      return;
+    }
+
+    const socketInstance = io(socketUrl);
+
+    socketInstance.on('connect', () => {
+      console.log('Socket.IO connected');
+      setIsConnected(true);
+    });
+
+    socketInstance.on('disconnect', () => {
+      console.log('Socket.IO disconnected');
+      setIsConnected(false);
+    });
+
+    socketInstance.on('status', (data: any) => {
+      console.log('Status:', data);
+    });
+
+    socketInstance.on('prediction', (data: { label: string; score: number }) => {
+      setPrediction(data);
+
+      // Check if prediction matches the target letter
+      if (data.label.toLowerCase() === letter.toLowerCase() && data.score >= 0) {
+        setIsCorrect(true);
+        // Stop sending frames
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        // Disconnect socket
+        socketInstance.disconnect();
+      }
+    });
+
+    setSocket(socketInstance);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      socketInstance.disconnect();
+      console.log("disconnected");
+    };
+  }, [letter]);
+
+  // Auto-start frame sending when camera is ready
+  useEffect(() => {
+    if (!socket || !isConnected || !videoRef.current || !streamRef.current || isCorrect) {
+      return;
+    }
+
+    // Wait a bit for video to be fully ready
+    const timeoutId = setTimeout(() => {
+      if (!videoRef.current || videoRef.current.readyState < 2) {
+        return;
+      }
+
+      // Start sending frames automatically
+      const interval = setInterval(() => {
+        captureFrame();
+      }, 100); // 25 FPS
+
+      intervalRef.current = interval;
+    }, 500);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [socket, isConnected, streamRef.current, isCorrect]);
+
+  // Frame capture function
+  const captureFrame = () => {
+    if (!videoRef.current || !canvasRef.current || !socket) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    // Check if video is ready
+    if (video.readyState < 2) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+
+    try {
+      const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+      socket.emit('frame', { image: base64 });
+    } catch (error) {
+      console.error('Error capturing frame:', error);
+    }
+  };
+
   const handleFinish = () => {
+    // Stop interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    // Disconnect socket
+    if (socket) {
+      socket.disconnect();
+    }
+
+    // Stop camera
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
+
     // Route to good-job page with lesson type
     router.push(`/good-job?type=${lessonType || "alphabet"}`);
   };
@@ -71,6 +200,13 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
               />
             )}
           </div>
+
+          {/* Prediction display below user's camera */}
+          {prediction.label !== 'none' && !isCorrect && (
+            <p className="text-lg text-muted-foreground mt-2">
+              Detected: {prediction.label.toUpperCase()}
+            </p>
+          )}
         </div>
 
         {/* Reference Image/Video */}
@@ -84,12 +220,12 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
               {showReference ? "Hide" : "Show"}
             </button>
           </div>
-          
+
           {showReference && imageUrl && (
             <div className="w-full aspect-video bg-muted rounded-lg overflow-hidden">
               {isVideo ? (
-                <video 
-                  src={imageUrl} 
+                <video
+                  src={imageUrl}
                   className="w-full h-full object-contain"
                   controls
                   autoPlay
@@ -97,15 +233,15 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
                   muted
                 />
               ) : (
-                <img 
-                  src={imageUrl} 
-                  alt={letter} 
-                  className="w-full h-full object-contain" 
+                <img
+                  src={imageUrl}
+                  alt={letter}
+                  className="w-full h-full object-contain"
                 />
               )}
             </div>
           )}
-          
+
           {!showReference && (
             <div className="w-full aspect-video bg-muted/30 rounded-lg flex items-center justify-center">
               <p className="text-muted-foreground">Click "Show" to see reference</p>
@@ -114,6 +250,13 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
         </div>
       </div>
 
+      {/* Success message - big, center, above buttons */}
+      {isCorrect && (
+        <div className="my-6">
+          <h1 className="text-5xl font-bold text-green-500">Correct!!</h1>
+        </div>
+      )}
+
       <div className="flex gap-4">
         <button
           onClick={() => setShowReference(!showReference)}
@@ -121,7 +264,7 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
         >
           {showReference ? "Hide Reference" : "Show Reference"}
         </button>
-        
+
         <button
           onClick={handleFinish}
           className="px-6 py-3 bg-primary text-background rounded-lg hover:bg-primary/90 transition-all"
@@ -129,6 +272,9 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
           Finish Lesson
         </button>
       </div>
+
+      {/* Hidden canvas for frame capture */}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }
