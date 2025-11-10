@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-   eslint: {
+  reactStrictMode: false, // Disable to prevent double Socket.IO connections
+  eslint: {
     // Disable ESLint during build
     ignoreDuringBuilds: true,
   },

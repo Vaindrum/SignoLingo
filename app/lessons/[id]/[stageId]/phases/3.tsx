@@ -57,10 +57,16 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
       return;
     }
 
+    // Prevent duplicate connections
+    if (socket?.connected) {
+      console.log('Socket already connected, reusing existing connection');
+      return;
+    }
+
     const socketInstance = io(socketUrl);
 
     socketInstance.on('connect', () => {
-      console.log('Socket.IO connected');
+      console.log('Socket.IO connected with SID:', socketInstance.id);
       setIsConnected(true);
     });
 
@@ -95,52 +101,86 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-      socketInstance.disconnect();
-      console.log("disconnected");
+      if (socketInstance.connected) {
+        socketInstance.disconnect();
+      }
     };
   }, [letter]);
 
   // Auto-start frame sending when camera is ready
   useEffect(() => {
-    if (!socket || !isConnected || !videoRef.current || !streamRef.current || isCorrect) {
+    if (!socket || !isConnected || isCorrect) {
+      console.log('Frame sending blocked:', { socket: !!socket, isConnected, isCorrect });
       return;
     }
 
-    // Wait a bit for video to be fully ready
-    const timeoutId = setTimeout(() => {
-      if (!videoRef.current || videoRef.current.readyState < 2) {
+    // Check if video is ready before starting
+    const checkAndStartSending = () => {
+      const video = videoRef.current;
+      if (!video || !streamRef.current) {
+        console.log('Video or stream not ready yet');
         return;
       }
 
+      // Wait for video to be ready
+      if (video.readyState < 2) {
+        console.log('Waiting for video readyState...');
+        video.addEventListener('loadeddata', checkAndStartSending, { once: true });
+        return;
+      }
+
+      console.log('Starting frame sending at 25 FPS');
+      
       // Start sending frames automatically
       const interval = setInterval(() => {
         captureFrame();
-      }, 100); // 25 FPS
+      }, 40); // 25 FPS
 
       intervalRef.current = interval;
-    }, 500);
+    };
+
+    // Small delay to ensure camera stream is fully initialized
+    const timeoutId = setTimeout(checkAndStartSending, 500);
 
     return () => {
       clearTimeout(timeoutId);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
+        console.log('Frame sending stopped');
       }
     };
-  }, [socket, isConnected, streamRef.current, isCorrect]);
+  }, [socket, isConnected, isCorrect]);
 
   // Frame capture function
   const captureFrame = () => {
-    if (!videoRef.current || !canvasRef.current || !socket) return;
+    if (!videoRef.current || !canvasRef.current || !socket) {
+      return;
+    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
     // Check if video is ready
-    if (video.readyState < 2) return;
+    if (video.readyState < 2) {
+      return;
+    }
 
+    // Check if socket is still connected
+    if (!socket.connected) {
+      console.log('Socket disconnected, stopping frame capture');
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
+    }
+    
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx){ 
+      console.log("canva error");
+      return;
+    }
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -149,6 +189,7 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
     try {
       const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
       socket.emit('frame', { image: base64 });
+      console.log("frame sent");
     } catch (error) {
       console.error('Error capturing frame:', error);
     }
