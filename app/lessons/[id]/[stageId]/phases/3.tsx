@@ -51,11 +51,20 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
 
   // Socket.IO initialization - connect immediately on mount
   useEffect(() => {
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKETIO_URL;
+    // Choose URL based on lessonType
+    let socketUrl: string | undefined;
+    if (lessonType === 'alphabet') {
+      socketUrl = process.env.NEXT_PUBLIC_SOCKETIO_ALPHABET_URL;
+    } else {
+      socketUrl = process.env.NEXT_PUBLIC_SOCKETIO_URL;
+    }
+
     if (!socketUrl) {
-      console.error("Socket.IO URL not configured");
+      console.error("Socket.IO URL not configured for lessonType:", lessonType);
       return;
     }
+
+    console.log('Connecting to Socket.IO:', socketUrl, 'for lessonType:', lessonType);
 
     // Prevent duplicate connections
     if (socket?.connected) {
@@ -105,7 +114,7 @@ export default function Phase3({ letter, imageUrl, isVideo, lessonType }: Phase3
         socketInstance.disconnect();
       }
     };
-  }, [letter]);
+  }, [letter, lessonType]);
 
   // Auto-start frame sending when camera is ready
   useEffect(() => {
